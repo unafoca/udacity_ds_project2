@@ -7,8 +7,10 @@ from nltk.tokenize import word_tokenize
 
 from flask import Flask
 from flask import render_template, request, jsonify
-from plotly.graph_objs import Bar
-from sklearn.externals import joblib
+from plotly.graph_objs import Bar, Pie
+# from sklearn.externals import joblib
+import pickle
+import joblib
 from sqlalchemy import create_engine
 
 
@@ -32,7 +34,6 @@ df = pd.read_sql_table('data_cleaned', engine)
 # load model
 model = joblib.load("../models/classifier.pkl")
 
-
 # index webpage displays cool visuals and receives user input text for model
 @app.route('/')
 @app.route('/index')
@@ -43,6 +44,18 @@ def index():
     genre_counts = df.groupby('genre').count()['message']
     genre_names = list(genre_counts.index)
     
+    top_cat_counts = df.iloc[:,4:].sum().sort_values(ascending = False).head(5)
+    top_cat_names = list(top_cat_counts.index)
+
+    labels = ['Oxygen','Hydrogen','Carbon_Dioxide','Nitrogen']
+    values = [4500, 2500, 1053, 500]
+
+    df_n_cat = df.iloc[:,4:].sum(axis = 1).value_counts().sort_index()
+    gt = df_n_cat[df_n_cat.index > 8].sum()
+    df_n_cat = df_n_cat[df_n_cat.index <=8 ]
+    df_n_cat.index = ['with ' + str(i) + ' labels' for i in df_n_cat.index]
+    df_n_cat['with 8+ labels'] = gt
+
     # create visuals
     # TODO: Below is an example - modify to create your own visuals
     graphs = [
@@ -61,6 +74,38 @@ def index():
                 },
                 'xaxis': {
                     'title': "Genre"
+                }
+            }
+        },
+        {
+            'data': [
+                Pie(
+                    labels=df_n_cat.index, 
+                    values=df_n_cat.values,
+                    hole=.4,
+                    showlegend = True
+                )
+            ],
+
+            'layout': {
+                'title': 'Distribution of # Tagged Categories'
+            }
+        },
+        {   
+            'data': [
+                Bar(
+                    x=top_cat_names,
+                    y=top_cat_counts
+                )
+            ],
+
+            'layout': {
+                'title': 'Message Volumes for Top 5 Categories',
+                'yaxis': {
+                    'title': "Count"
+                },
+                'xaxis': {
+                    'title': "Category"
                 }
             }
         }
