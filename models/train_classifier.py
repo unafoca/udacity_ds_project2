@@ -22,6 +22,9 @@ from sklearn.model_selection import train_test_split, GridSearchCV
 
 
 def load_data(database_filepath):
+    '''
+    Read in cleaned data from database and output model ready training data X, Y and list of categories we are prediction
+    '''
     engine = create_engine('sqlite:///' + database_filepath)
     df = pd.read_sql_table('data_cleaned', engine)  
     X = df['message'].values
@@ -34,16 +37,24 @@ def load_data(database_filepath):
 
 
 def tokenize(text):
+    '''
+    Tokenize and lemmatize the input text
+    '''
     tokens = word_tokenize(text)
     lemmatizer = WordNetLemmatizer()
     
-#     lemmatize and remove punctuation and stopwords
+    # lemmatize and remove punctuation and stopwords
     clean_tokens = [lemmatizer.lemmatize(tok).lower().strip() 
                         for tok in tokens 
                         if tok.isalpha() and tok not in stopwords.words('english')]
     return clean_tokens
 
 def build_model():
+    '''
+    Create pipeline and parameters for grid search
+
+    OUTPUT: defined model with hyperparameter to be tunned
+    '''
     pipeline = Pipeline([
         ('vect', CountVectorizer(tokenizer=tokenize)),
         ('tfidf', TfidfTransformer()),
@@ -51,7 +62,6 @@ def build_model():
     ])
 
     parameters = {
-   
         'clf__estimator__solver': ['newton-cg', 'lbfgs', 'liblinear', 'sag'], 
         'clf__estimator__C': [10, 1.0, 0.1]
     }
@@ -60,6 +70,10 @@ def build_model():
     return cv
 
 def evaluate_model(model, X_test, Y_test, category_names):
+    '''
+    Evaluating the trained model using test dataset and print out results
+    '''
+    
     Y_pred = model.predict(X_test)
     for i in range(len(category_names)):
         print(category_names[i], ':')
@@ -67,6 +81,9 @@ def evaluate_model(model, X_test, Y_test, category_names):
         
 
 def save_model(model, model_filepath):
+    '''
+    Save the trained model as a pickle file
+    '''
     pickle.dump(model, open(model_filepath,'wb'))
 
 

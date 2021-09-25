@@ -4,6 +4,9 @@ import numpy as np
 from sqlalchemy import create_engine
 
 def load_data(messages_filepath, categories_filepath):
+    '''
+    Read in source data and combine the dataset
+    '''
     
     messages = pd.read_csv(messages_filepath)
     categories = pd.read_csv(categories_filepath)
@@ -13,6 +16,11 @@ def load_data(messages_filepath, categories_filepath):
 
 
 def clean_data(df):
+    '''
+    Clean data and prepare data for model training
+    '''
+    # splitting categories into different columns for model training
+
     categories = df.categories.str.split(';', expand=True)
     row = categories.iloc[0]
     category_colnames = row.apply(lambda x: x[:-2])
@@ -22,14 +30,21 @@ def clean_data(df):
         categories[column] = categories[column].str[-1]
         # convert column from string to numeric
         categories[column] = categories[column].astype(int)
+
     df.drop('categories', axis = 1, inplace = True)
     df = pd.concat([df, categories], axis=1)
-    df.drop_duplicates(inplace=True)
-    df = df[df.related != 2]
+
+    df.drop_duplicates(inplace=True) # remove duplicates
+
+    df = df[df.related != 2] # remove outliers
     return df
 
 
 def save_data(df, database_filename):
+    '''
+    Save cleaned data into database
+    '''
+    
     engine = create_engine('sqlite:///' + database_filename)
     df.to_sql('data_cleaned', engine, index=False)
 
