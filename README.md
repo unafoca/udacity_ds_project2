@@ -2,14 +2,14 @@
 
 ### Installation
 In order to run the codes successfully, you'll need to install below packages:
-<br/> 
+
 * pandas (1.1.*)
 * numpy (1.18.5)
 * nltk (3.5)
 * sqlalchemy (1.3.18)
 * pickle (4.0)
 * sklearn (0.23.1)
-)<br/>
+
 
 After that the code should run with no issues using Python versions 3.*.
 
@@ -18,12 +18,11 @@ This project is a disaster response pipeline that aims to predict relevant disas
 
 ### File Descriptions
 There are 3 folders in this repo. 
-<br/> 
+ 
 * data - ETL pipeline: This is the first step of the project, which consists of source data, database, and the script for data cleaning and preparation for the model training
 * models - Machine Learning pipeline: This is the model training step of the project, including a script taking the cleaned data from ETL pipeline and training the models for tag prediction, and the best model based on grid search result saved as a pickle file
 * app: This is the visualization step of the entire project.
 * Please follow the steps in *Instructions* to run the entire pipeline on your local computer.
-<br/>
 
 ### Instructions:
 1. Run the following commands in the project's root directory to set up your database and model.
